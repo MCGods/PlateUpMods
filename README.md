@@ -8,10 +8,10 @@ Project configured per https://github.com/tpill90/PlateUp-Mods/tree/master
 
 <table>
       <tr>
-        <td>Paper Plates</td>
-        <td>No more need to wash dirty dishes!  Just throw them away instead! </td>
-        <td> <a href="https://github.com/tpill90/PlateUp-Mods/blob/master/PaperPlates/README.md">Readme</a> </td>
-        <td> <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3569921419">Steam Workshop</a> </td>
+        <td>Train For Turbo</td>
+        <td>Turbo is too hard? Start your kitchen with more customers to hone your skill!! </td>
+        <td> <a href="https://github.com/MCGods/PlateUpMods/tree/main/TrainForTurbo/README.md">Readme</a> </td>
+        <td> <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3639508275">Steam Workshop</a> </td>
       </tr>
 </table>
 

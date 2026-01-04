@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <!-- TODO cleanup-->
+    <PropertyGroup>
+        <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+        <ModName>DebuggerShimPlugin</ModName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <OutputType>Library</OutputType>
+        <LangVersion>latest</LangVersion>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>Full</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <!-- This needs to be changed to your Plateup install directory -->
+        <PlateUpInstallDir>C:\Program Files (x86)\Steam\steamapps\common\PlateUp</PlateUpInstallDir>
+
+        <BepinExPluginsDir>$(PlateUpInstallDir)\PlateUp\BepInEx\plugins</BepinExPluginsDir>
+        <Managed>$(PlateUpInstallDir)\PlateUp\PlateUp_Data\Managed</Managed>
+        <AssemblySearchPaths>$(AssemblySearchPaths);$(Managed);$(PlateUpInstallDir)\PlateUp\BepInEx\Core</AssemblySearchPaths>
+    </PropertyGroup>
+
+    <!-- Launches the game when running with or without debugger. -->
+    <PropertyGroup>
+        <StartAction>Program</StartAction>
+        <StartProgram>$(PlateUpInstallDir)\PlateUp\PlateUp.exe</StartProgram>
+    </PropertyGroup>
+
+    <!-- References -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.13.9" />
+        <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+
+        <Reference Include="BepInEx.Core" />
+        <Reference Include="BepInEx.Unity.Mono" />
+        <Reference Include="UnityEngine" />
+        <Reference Include="UnityEngine.CoreModule" />
+    </ItemGroup>
+
+    <!-- Copies the built plugin to the plugin dir -->
+    <Target Name="PostBuildDebug" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+        <Copy SourceFiles="$(TargetPath);" DestinationFolder="$(BepinExPluginsDir)" />
+    </Target>
+</Project>

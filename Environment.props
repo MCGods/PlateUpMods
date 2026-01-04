@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file contains MSBuild config that is the same between all of my mods.  This is stuff that ended up getting copy+pasted between each project's .csproj -->
+<Project ToolsVersion="Current">
+    <PropertyGroup>
+        <!-- This needs to be changed to your Plateup install directory -->
+        <PlateUpInstallDir>C:\Program Files (x86)\Steam\steamapps\common\PlateUp</PlateUpInstallDir>
+
+        <!--This tells the compiler where to look for assemblies. Don't change it.-->
+        <Managed>$(PlateUpInstallDir)\PlateUp\PlateUp_Data\Managed</Managed>
+        <AssemblySearchPaths>$(AssemblySearchPaths);$(Managed);$(PlateUpInstallDir)\PlateUp\BepInEx\core</AssemblySearchPaths>
+
+        <!-- Various directories we need -->
+        <WorshopDir>C:\Program Files (x86)\Steam\steamapps\workshop\content\1599600</WorshopDir>
+        <TestModDeployPath>$(PlateUpInstallDir)\PlateUp\Mods\$(ModName)\content</TestModDeployPath>
+        <ReleaseAssetPath>$(MSBuildProjectDirectory)\workshop\content </ReleaseAssetPath>
+    </PropertyGroup>
+
+    <!-- Shared C# config -->
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <OutputType>Library</OutputType>
+        <LangVersion>latest</LangVersion>
+
+        <!-- Allows us to use publicized assemblies -->
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+
+    <!-- Launches the game when running with or without debugger. -->
+    <PropertyGroup>
+        <StartAction>Program</StartAction>
+        <StartProgram>$(PlateUpInstallDir)\PlateUp\PlateUp.exe</StartProgram>
+    </PropertyGroup>
+
+    <!-- Required for debugging -->
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>Full</DebugType>
+    </PropertyGroup>
+
+    <!-- Copies the mod .dll + .pdb into the plateup mod dir alongside the executable -->
+    <Target Name="PostBuildDebug" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Debug'">
+        <Copy SourceFiles="$(TargetPath);$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TestModDeployPath)" />
+    </Target>
+
+    <!-- Cleans up test mods dir -->
+    <Target Name="CleanupTestMods" BeforeTargets="CoreClean">
+        <RemoveDir Directories="$(TestModDeployPath)" />
+    </Target>
+
+    <!-- Copies the compiled dll to the release directory so it can be uploaded to the workshop -->
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)' == 'Release'">
+      <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleaseAssetPath)" />
+    </Target>
+
+    <!-- TODO Comment-->
+    <ItemGroup>
+        <Compile Remove="workshop\content\**" />
+        <EmbeddedResource Remove="workshop\content\**" />
+        <None Remove="workshop\content\**" />
+    </ItemGroup>
+</Project>

@@ -1,6 +1,6 @@
 # Plate Up! Mods
 
-A collection of my mods for the game [Plate Up!](https://store.steampowered.com/app/1599600/PlateUp/).  All of my mods can be seen in the [Steam Workshop](https://steamcommunity.com/id/suuhduude/myworkshopfiles/?appid=1599600).
+A collection of my mods for the game [Plate Up!](https://store.steampowered.com/app/1599600/PlateUp/).  All of my mods can be seen in the [Steam Workshop](https://steamcommunity.com/id/MCGods/myworkshopfiles/?appid=1599600).
 
 Project configured per https://github.com/tpill90/PlateUp-Mods/tree/master
 

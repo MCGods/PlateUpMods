@@ -1,5 +1,27 @@
-﻿using System.Linq;
+﻿using Kitchen;
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using UnityEngine;
+/**
 
+Picky Eaters:-2040314977
+Double Helpings:2055765569
+All You Can Eat:-347199069
+Personalised Waiting:233335391
+Leisurely Eating:-287956430
+Dinner Rush:-37551439
+Flexible Dining:-2112255403
+Individual Dining:-1747821833
+Large Groups:-523195599
+Medium Groups:-1183014556
+Lunch Rush:-53330922
+Advertising: 73387665
+Advertising: 1765310572
+Morning Rush:2079763934
+High Expectations:-534291083
+*/
 namespace TrainForTurbo
 {
     [HarmonyPatch]
@@ -40,9 +62,57 @@ namespace TrainForTurbo
             }
         };
 
+        static List<int> AvailableCards = new List<int>();
+        static int CardsChosen = 0;
+
+        [HarmonyPatch(typeof(HandleUnlockChoice), "OnUpdate")]
+        [HarmonyPostfix]
+        static void AfterUnlockChoice(HandleUnlockChoice __instance)
+        {
+            var em = __instance.EntityManager;
+
+            // Query the popup entity
+            EntityQuery q = em.CreateEntityQuery(
+                typeof(CPopup),
+                typeof(CUnlockSelectPopupOption),
+                typeof(CUnlockSelectPopupResult)
+            );
+
+            if (q.IsEmpty)
+            {
+                return;
+            }
+
+            // There should be exactly one popup entity
+            Entity popup = q.GetSingletonEntity();
+
+            // Read the options buffer
+            DynamicBuffer<CUnlockSelectPopupOption> options =
+                em.GetBuffer<CUnlockSelectPopupOption>(popup);
+
+            // Read the result
+            CUnlockSelectPopupResult result =
+                em.GetComponentData<CUnlockSelectPopupResult>(popup);
+
+            int selectedIndex = result.Selection.Index;
+            foreach (var item in options)
+            {
+                if (selectedIndex == item.Entity.Index)
+                {
+                    LogInfo($"Player chose card ID: {item.ID}");
+                    var success = RemoveCardFromPool(item.ID);
+                    if (success)
+                    {
+                        CardsChosen++;
+
+                    }
+                }
+            }
+        }
+
 
         [HarmonyPatch(typeof(CreateNewKitchen), "OnUpdate")]
-        [HarmonyPrefix]
+        [HarmonyPostfix]
         static void OnKitchenCreation()
         {
             LogInfo("Patching kitchen");
@@ -52,13 +122,54 @@ namespace TrainForTurbo
                 return;
 
             LogInfo("Kitchen created - day" + GetDay());
+            CardsChosen = 0;
 
             // Build card list
-            List<int> cards = GetAllowedCardIDs(modEnabled);
-            cards.ShuffleInPlace();
-            cards.Take(2);
+            AvailableCards = GetAllowedCardIDs(modEnabled);
+            AvailableCards.ShuffleInPlace();
 
-            CreateProgressionOption(cards);
+            ChooseCards();
+
+            // Queue second set for next frame
+            //_ = DelayNextFrame(() => { ChooseCards(); });
+        }
+
+        [HarmonyPatch(typeof(CreateUnlockChoicePopup), "OnUpdate")]
+        [HarmonyPostfix]
+        static void AfterPopupClosed(CreateUnlockChoicePopup __instance)
+        {
+            var em = __instance.EntityManager;
+
+            // If a popup still exists, do nothing
+            EntityQuery popupQuery = em.CreateEntityQuery(
+                typeof(CPopup),
+                typeof(CUnlockSelectPopupOption)
+            );
+
+            if (!popupQuery.IsEmpty)
+                return;
+
+            // If no popup exists AND we have more cards to show, spawn next pair
+            int modEnabled = TrainForTurbo.PrefManager.Get<int>(TrainForTurbo.ModEnabledPreferenceKey);
+            int numOfCardsSetting = TrainForTurbo.PrefManager.Get<int>(TrainForTurbo.CardsNumberPreferenceKey);
+            if (modEnabled != 0 && CardsChosen < numOfCardsSetting  && AvailableCards.Count >= 2)
+            {
+                LogInfo("Another card");
+                ChooseCards();
+            }
+        }
+
+        static void ChooseCards()
+        {
+            LogInfo($"Cards available: {AvailableCards.Count}");
+            int count = Math.Min(2, AvailableCards.Count);
+            List<int> choice = AvailableCards.Take(count).ToList();
+            CreateProgressionOption(choice);
+        }
+        static async Task DelayNextFrame(Action action)
+        {
+            await Task.Yield(); // waits one frame
+            action();
         }
 
         static HashSet<string> GetAllowedNamesForSetting(int setting)
@@ -75,6 +186,12 @@ namespace TrainForTurbo
             }
 
             return names;
+        }
+
+        static bool RemoveCardFromPool(int id)
+        {
+            LogInfo($"Card removed: {id}");
+            return AvailableCards.Remove(id);
         }
 
 
@@ -116,23 +233,23 @@ namespace TrainForTurbo
 
         static void CreateProgressionOption(List<int> ids)
         {
-            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+            if (ids.Count < 2)
+            {
+                return;
+            }
 
             int id0 = ids[0];
             int id1 = ids[1];
-
-            // --- Create first option ---
-            Entity e0 = em.CreateEntity(typeof(CProgressionOption));
-            em.AddComponentData(e0, new CUnlockSelectPopupType { RewardType = UnlockRewardType.Subcard });
-            em.SetComponentData(e0, new CProgressionOption { ID = id0, FromFranchise = false });
-            LogInfo($"Created CProgressionOption entity for card id {id0}");
-
-            // --- Create second option ---
-            Entity e1 = em.CreateEntity(typeof(CProgressionOption));
-            em.AddComponentData(e1, new CUnlockSelectPopupType { RewardType = UnlockRewardType.Subcard });
-            em.SetComponentData(e1, new CProgressionOption { ID = id1, FromFranchise = false });
-            LogInfo($"Created CProgressionOption entity for card id {id1}");
+            var em = World.DefaultGameObjectInjectionWorld.EntityManager;
+            Entity e = em.CreateEntity(typeof(CSubcardChoice));
+            em.SetComponentData(e,
+                new CSubcardChoice
+                {
+                    Choice1 = id0,
+                    Choice2 = id1,
+                    FromFranchise = false
+                });
+            LogInfo($"Created CSubcardChoice: {id0}, {id1}");
         }
-
     }
 }

@@ -5,6 +5,7 @@
     {
         public static PreferenceSystemManager PrefManager;
         public static readonly string ModEnabledPreferenceKey = "TrainForTurbo_ModEnabledKey";
+        public static readonly string CardsNumberPreferenceKey = "TrainForTurbo_NumberOfCards";
 
         public override void Initialise()
         {
@@ -16,6 +17,10 @@
             PrefManager = new PreferenceSystemManager(ModInfo.ModName, ModInfo.ModNameHumanReadable);
             PrefManager.AddLabel("Day 1 card")
                         .AddOption(ModEnabledPreferenceKey, initialValue: 4, values: new int[] { 0, 1, 2, 3, 4 }, strings: new string[] { "Disabled", "Customers", "Customers and Groups", "Customers and Rush", "Harder Customers" })
+                        .AddSpacer()
+                        .AddSpacer()
+                        .AddLabel("Number of cards")
+                        .AddOption(CardsNumberPreferenceKey, initialValue: 1, values: new int[] { 1, 2, 3, 4 }, strings: new string[] { "1", "2", "3", "4" })
                         .AddSpacer()
                         .AddSpacer();
             PrefManager.RegisterMenu(PreferenceSystemManager.MenuType.PauseMenu);

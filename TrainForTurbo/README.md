@@ -3,7 +3,13 @@
 Turbo is too hard? Start your kitchen with more customers to hone your skill!
 
 ## Description
-Requires PreferenceSystemManager. The following can be chosen
+Requires PreferenceSystemManager. 
+
+Allows configuring of:
+ - which cards to choose from
+ - how many cards to choose
+
+The following cards can be chosen
 
 0 (Disabled)
 
@@ -33,6 +39,6 @@ Picky Eaters
 ## Features
 
 * Mod is configurable to allow different groups of card selection on day 1.
-* (Future) Select more than one card?
+* (Done in v1.1!) Select more than one card?
 * (Future) Be forced to keep the card at franchise?
 * (Bugs!) Test behaviour with franchise and existing cards etc.

@@ -10,6 +10,6 @@ namespace TrainForTurbo.Properties
     {
         public const string ModName = "TrainForTurbo";
         public const string ModNameHumanReadable = "Train For Turbo";
-        public const string ModVersion = "1.0.0.0";
+        public const string ModVersion = "1.1.0.0";
     }
 }
